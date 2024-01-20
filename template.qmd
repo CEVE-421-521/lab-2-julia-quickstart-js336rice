@@ -157,6 +157,7 @@ dropmissing!(df) # drop any missing data
 1. Plot the hourly water levels for March 2020, using subsetting and plotting techniques from the instructions
 
 ```{julia}
+
 t_start = Dates.DateTime(2020, 3, 1, 0)
 t_end = Dates.DateTime(2020, 3, 31, 23)
 df_month = @subset(df, t_start .<= :datetime .<= t_end)
@@ -174,15 +175,8 @@ plot(
 1. In the instructions, we plotted the average monthly water level from each month using `groupby`. Repeat this analysis, using the full dataset (all years). 
 
 
-```{julia}
-
-
-```
-
-
 
 ```{julia}
-
 df[!, :month] = Dates.month.(df.datetime)
 dropmissing!(df, :lsl)
 df_bymonth = groupby(df, :month)
@@ -204,3 +198,22 @@ plot(
 
 1. Now repeat the analysis, but group by day of the year. What do you notice? (**Hint**: use `Dates.dayofyear` to get the day of the year from a `DateTime` object)
 
+A: We notice that this day-by-day graph looks like a higher-resolution version of the previous month-by-month graph
+
+```{julia}
+df[!, :DayOfYear] = Dates.dayofyear.(df.datetime)
+dropmissing!(df, :lsl)
+df_byday = groupby(df, :DayOfYear)
+df_climatology = combine(df_byday, :lsl => mean => :lsl_avg);
+
+plot(
+    df_climatology.DayOfYear,
+    df_climatology.lsl_avg;
+    xticks=1:30:365,
+    xlabel="Day",
+    ylabel="Average Water level",
+    linewidth=3,
+    label=false,
+)
+
+```
